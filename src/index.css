@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 96%;
+    --foreground: 215 28% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 16%;
+    --primary: 32 95% 44%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 215 25% 25%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 40%;
+    --accent: 32 95% 44%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 74% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 32 95% 44%;
+    --radius: 0.75rem;
+
+    --sidebar-background: 215 28% 12%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 32 95% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 22%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 25% 22%;
+    --sidebar-ring: 32 95% 44%;
+  }
+
+  .dark {
+    --background: 215 28% 6%;
+    --foreground: 210 20% 92%;
+    --card: 215 28% 10%;
+    --card-foreground: 210 20% 92%;
+    --popover: 215 28% 10%;
+    --popover-foreground: 210 20% 92%;
+    --primary: 32 95% 50%;
+    --primary-foreground: 215 28% 6%;
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 210 20% 90%;
+    --muted: 215 25% 16%;
+    --muted-foreground: 215 16% 62%;
+    --accent: 32 95% 50%;
+    --accent-foreground: 215 28% 6%;
+    --destructive: 0 74% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 32 95% 50%;
+
+    --sidebar-background: 215 28% 5%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 32 95% 50%;
+    --sidebar-primary-foreground: 215 28% 5%;
+    --sidebar-accent: 215 25% 14%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 215 25% 14%;
+    --sidebar-ring: 32 95% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out both;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.25s ease-out both;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
