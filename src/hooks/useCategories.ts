@@ -1,38 +1,32 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Category } from '@/types';
-import { getCategories, saveCategories, generateId, nowStr } from '@/lib/storage';
+import { fetchCategories, createCategory, updateCategory, deleteCategory } from '@/lib/api';
 
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setCategories(getCategories());
+  const loadCategories = useCallback(async () => {
+    setLoading(true);
+    try { setCategories(await fetchCategories()); } catch { /* ignore */ }
     setLoading(false);
   }, []);
 
-  const refresh = useCallback(() => setCategories(getCategories()), []);
+  useEffect(() => { loadCategories(); }, [loadCategories]);
 
-  const addCategory = useCallback((name: string) => {
-    const all = getCategories();
-    if (all.find(c => c.name === name)) return { ok: false, error: '分类已存在' };
-    const cat: Category = { id: generateId(), name, createdAt: nowStr() };
-    saveCategories([...all, cat]);
-    refresh();
-    return { ok: true };
-  }, [refresh]);
+  const addCategory = useCallback(async (name: string) => {
+    try { await createCategory(name); loadCategories(); return { ok: true }; }
+    catch (e: any) { return { ok: false, error: e.message }; }
+  }, [loadCategories]);
 
-  const updateCategory = useCallback((id: string, name: string) => {
-    const all = getCategories();
-    saveCategories(all.map(c => c.id === id ? { ...c, name } : c));
-    refresh();
-  }, [refresh]);
+  const editCategory = useCallback(async (id: string, name: string) => {
+    await updateCategory(id, name);
+    loadCategories();
+  }, [loadCategories]);
 
-  const deleteCategory = useCallback((id: string) => {
-    const all = getCategories().filter(c => c.id !== id);
-    saveCategories(all);
-    refresh();
-  }, [refresh]);
+  const removeCategory = useCallback(async (id: string) => {
+    await deleteCategory(id);
+    loadCategories();
+  }, [loadCategories]);
 
-  return { categories, loading, refresh, addCategory, updateCategory, deleteCategory };
+  return { categories, loading, refresh: loadCategories, addCategory, updateCategory: editCategory, deleteCategory: removeCategory };
 }

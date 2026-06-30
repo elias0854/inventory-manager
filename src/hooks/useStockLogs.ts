@@ -1,32 +1,29 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { StockLog } from '@/types';
-import { getStockLogs, saveStockLogs } from '@/lib/storage';
+import { fetchLogs } from '@/lib/api';
 
 export function useStockLogs() {
-  const [logs, setLogs] = useState<StockLog[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLogs(getStockLogs());
+  const loadLogs = useCallback(async (params?: { product_id?: string; type?: string }) => {
+    setLoading(true);
+    try {
+      const res = await fetchLogs({ ...params, limit: 100 });
+      setLogs(res.data);
+    } catch { /* ignore */ }
     setLoading(false);
   }, []);
 
-  const refresh = useCallback(() => setLogs(getStockLogs()), []);
-
-  const addLog = useCallback((log: StockLog) => {
-    const all = getStockLogs();
-    saveStockLogs([log, ...all]);
-    refresh();
-  }, [refresh]);
+  useEffect(() => { loadLogs(); }, [loadLogs]);
 
   const getLogsByProduct = useCallback((productId: string) => {
-    return logs.filter(l => l.productId === productId);
+    return logs.filter(l => l.product_id === productId);
   }, [logs]);
 
   const getTodayLogs = useCallback(() => {
     const today = new Date().toISOString().slice(0, 10);
-    return logs.filter(l => l.createdAt.startsWith(today));
+    return logs.filter(l => l.created_at && l.created_at.startsWith(today));
   }, [logs]);
 
-  return { logs, loading, refresh, addLog, getLogsByProduct, getTodayLogs };
+  return { logs, loading, refresh: loadLogs, addLog: () => loadLogs(), getLogsByProduct, getTodayLogs };
 }

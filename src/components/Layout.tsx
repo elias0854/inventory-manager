@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   LayoutDashboard, Package, AlertTriangle, History, FolderTree,
-  LogOut, Menu, X, ChevronLeft, Sun, Moon
+  LogOut, Menu, X, ChevronLeft, Sun, Moon, Users
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -14,7 +14,8 @@ const navItems = [
   { path: '/products', label: '商品管理', icon: Package },
   { path: '/alerts', label: '库存预警', icon: AlertTriangle },
   { path: '/logs', label: '操作日志', icon: History },
-  { path: '/categories', label: '分类管理', icon: FolderTree },
+  { path: '/categories', label: '分类管理', icon: FolderTree, admin: true },
+  { path: '/users', label: '用户管理', icon: Users, admin: true },
 ];
 
 function isActive(path: string, current: string) {
@@ -44,7 +45,8 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const alertCount = products.filter(p => p.stock <= p.minStock).length;
+  const alertCount = products.filter((p: any) => p.stock <= p.min_stock).length;
+  const visibleNavItems = navItems.filter(item => !item.admin || user?.role === 'admin');
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -64,7 +66,7 @@ export default function Layout() {
 
       <ScrollArea className="flex-1">
         <div className="px-3 pt-3 pb-1 space-y-1">
-          {navItems.map(item => {
+          {visibleNavItems.map(item => {
             const active = isActive(item.path, location.pathname);
             return (
               <button
@@ -126,7 +128,6 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col bg-sidebar shrink-0 transition-all duration-300 ${
           sidebarCollapsed ? 'w-[56px]' : 'w-[220px]'
@@ -141,9 +142,7 @@ export default function Layout() {
         </button>
       </aside>
 
-      {/* Main Content */}
       <div className="flex flex-col flex-1 min-w-0 animate-fade-in">
-        {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between h-12 px-4 border-b bg-card shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
@@ -161,10 +160,9 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-b bg-card px-3 py-2 space-y-1 animate-slide-up">
-            {navItems.map(item => (
+            {visibleNavItems.map(item => (
               <Button
                 key={item.path}
                 variant={isActive(item.path, location.pathname) ? 'default' : 'ghost'}
@@ -182,16 +180,14 @@ export default function Layout() {
           </div>
         )}
 
-        {/* Page Content */}
         <main className="flex-1 overflow-auto p-5 md:p-6 lg:p-8">
           <div className="animate-fade-in">
             <Outlet />
           </div>
         </main>
 
-        {/* Mobile Bottom Nav */}
         <nav className="md:hidden flex border-t bg-card safe-area-bottom">
-          {navItems.map(item => {
+          {visibleNavItems.slice(0, 5).map(item => {
             const active = isActive(item.path, location.pathname);
             return (
               <button

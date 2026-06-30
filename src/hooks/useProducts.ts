@@ -1,48 +1,46 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Product } from '@/types';
-import { getProducts, saveProducts } from '@/lib/storage';
+import { fetchProducts, createProduct, updateProduct, deleteProduct, stockIn, stockOut } from '@/lib/api';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setProducts(getProducts());
+  const loadProducts = useCallback(async (params?: { search?: string; category_id?: string; page?: number }) => {
+    setLoading(true);
+    try {
+      const res = await fetchProducts({ ...params, limit: params?.page ? 10 : 1000 });
+      setProducts(res.data);
+      setTotal(res.total);
+    } catch { /* ignore */ }
     setLoading(false);
   }, []);
 
-  const refresh = useCallback(() => {
-    setProducts(getProducts());
+  useEffect(() => { loadProducts(); }, [loadProducts]);
+
+  const addProduct = useCallback(async (data: any) => {
+    const p = await createProduct(data);
+    await loadProducts();
+    return p;
+  }, [loadProducts]);
+
+  const editProduct = useCallback(async (id: string, data: any) => {
+    await updateProduct(id, data);
+    loadProducts();
+  }, [loadProducts]);
+
+  const removeProduct = useCallback(async (id: string) => {
+    await deleteProduct(id);
+    loadProducts();
+  }, [loadProducts]);
+
+  const doStockIn = useCallback(async (product_id: string, quantity: number, note?: string) => {
+    return stockIn(product_id, quantity, note);
   }, []);
 
-  const addProduct = useCallback((data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const all = getProducts();
-    const now = new Date().toISOString();
-    const p: Product = { ...data, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), createdAt: now, updatedAt: now };
-    saveProducts([...all, p]);
-    refresh();
-    return p;
-  }, [refresh]);
+  const doStockOut = useCallback(async (product_id: string, quantity: number, note?: string) => {
+    return stockOut(product_id, quantity, note);
+  }, []);
 
-  const updateProduct = useCallback((id: string, data: Partial<Product>) => {
-    const all = getProducts();
-    const updated = all.map(p => p.id === id ? { ...p, ...data, updatedAt: new Date().toISOString() } : p);
-    saveProducts(updated);
-    refresh();
-  }, [refresh]);
-
-  const deleteProduct = useCallback((id: string) => {
-    const all = getProducts().filter(p => p.id !== id);
-    saveProducts(all);
-    refresh();
-  }, [refresh]);
-
-  const updateStock = useCallback((id: string, newStock: number) => {
-    const all = getProducts();
-    const updated = all.map(p => p.id === id ? { ...p, stock: newStock, updatedAt: new Date().toISOString() } : p);
-    saveProducts(updated);
-    refresh();
-  }, [refresh]);
-
-  return { products, loading, refresh, addProduct, updateProduct, deleteProduct, updateStock };
+  return { products, total, loading, loadProducts, addProduct, updateProduct: editProduct, deleteProduct: removeProduct, updateStock: loadProducts, doStockIn, doStockOut };
 }

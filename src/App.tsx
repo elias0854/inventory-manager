@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { initDemoData } from '@/lib/storage';
 import Layout from '@/components/Layout';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
@@ -9,8 +8,7 @@ import ProductsPage from '@/pages/ProductsPage';
 import AlertsPage from '@/pages/AlertsPage';
 import LogsPage from '@/pages/LogsPage';
 import CategoriesPage from '@/pages/CategoriesPage';
-
-initDemoData();
+import UsersPage from '@/pages/UsersPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -38,6 +36,7 @@ export default function App() {
           <Route path="alerts" element={<AlertsPage />} />
           <Route path="logs" element={<LogsPage />} />
           <Route path="categories" element={<CategoriesPage />} />
+          <Route path="users" element={<UsersPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

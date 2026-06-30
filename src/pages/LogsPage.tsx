@@ -79,7 +79,7 @@ export default function LogsPage() {
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {log.note} · {log.username} · {new Date(log.createdAt).toLocaleString('zh-CN')}
+                      {log.note} · {log.username} · {new Date(log.created_at).toLocaleString('zh-CN')}
                     </p>
                   </div>
                   <div className="text-right shrink-0">

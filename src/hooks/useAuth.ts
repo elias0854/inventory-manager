@@ -1,36 +1,41 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { AuthUser } from '@/types';
-import { getUsers, saveUsers, getCurrentUser, saveCurrentUser, generateId, nowStr } from '@/lib/storage';
+import { apiLogin, apiRegister, clearToken } from '@/lib/api';
 
 export function useAuth() {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUser(getCurrentUser());
+    const stored = localStorage.getItem('inv_user');
+    const token = localStorage.getItem('inv_token');
+    if (stored && token) {
+      try { setUser(JSON.parse(stored)); } catch { clearToken(); }
+    }
     setLoading(false);
   }, []);
 
-  const login = useCallback((username: string, password: string): { ok: boolean; error?: string } => {
-    const users = getUsers();
-    const found = users.find(u => u.username === username && u.password === password);
-    if (!found) return { ok: false, error: '用户名或密码错误' };
-    const authUser: AuthUser = { id: found.id, username: found.username, role: found.role };
-    saveCurrentUser(authUser);
-    setUser(authUser);
-    return { ok: true };
+  const login = useCallback(async (username: string, password: string) => {
+    try {
+      const u = await apiLogin(username, password);
+      setUser(u);
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, error: e.message };
+    }
   }, []);
 
-  const register = useCallback((username: string, password: string): { ok: boolean; error?: string } => {
-    const users = getUsers();
-    if (users.find(u => u.username === username)) return { ok: false, error: '用户名已存在' };
-    const newUser = { id: generateId(), username, password, role: 'operator' as const, createdAt: nowStr() };
-    saveUsers([...users, newUser]);
-    return login(username, password);
-  }, [login]);
+  const register = useCallback(async (username: string, password: string) => {
+    try {
+      const u = await apiRegister(username, password);
+      setUser(u);
+      return { ok: true };
+    } catch (e: any) {
+      return { ok: false, error: e.message };
+    }
+  }, []);
 
   const logout = useCallback(() => {
-    saveCurrentUser(null);
+    clearToken();
     setUser(null);
   }, []);
 

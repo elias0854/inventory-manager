@@ -17,17 +17,17 @@ export default function CategoriesPage() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
 
-  const getProductCount = (catId: string) => products.filter(p => p.categoryId === catId).length;
+  const getProductCount = (catId: string) => products.filter((p: any) => p.category_id === catId).length;
 
   const openAdd = () => { setEditId(null); setName(''); setError(''); setDialogOpen(true); };
   const openEdit = (id: string, currentName: string) => { setEditId(id); setName(currentName); setError(''); setDialogOpen(true); };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) { setError('请输入分类名称'); return; }
     if (editId) {
       updateCategory(editId, name.trim());
     } else {
-      const result = addCategory(name.trim());
+      const result = await addCategory(name.trim());
       if (!result.ok) { setError(result.error || '添加失败'); return; }
     }
     setDialogOpen(false);

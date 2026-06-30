@@ -16,13 +16,13 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (password !== confirm) { setError('两次密码不一致'); return; }
     if (password.length < 3) { setError('密码至少3位'); return; }
     setLoading(true);
-    const result = register(username, password);
+    const result = await register(username, password);
     setLoading(false);
     if (result.ok) {
       navigate('/', { replace: true });
